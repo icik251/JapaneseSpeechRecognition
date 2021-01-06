@@ -1,9 +1,10 @@
 import numpy as np
 import csv
 import pickle
+import os
 
 # Train feature vectors 
-train_reader = csv.reader(open("Data\\ae.train"), delimiter=" ")
+train_reader = csv.reader(open("Data"+os.sep+"ae.train"), delimiter=" ")
 
 list_of_train = []
 curr_np_array = np.empty(shape=(0,12))
@@ -18,7 +19,7 @@ for row in train_reader:
         curr_np_array = np.append(curr_np_array, [list(map(float, row))], axis=0)
         
 # Test feature vectors
-test_reader = csv.reader(open("Data\\ae.test"), delimiter=" ")
+test_reader = csv.reader(open("Data"+os.sep+"ae.test"), delimiter=" ")
 
 list_of_test = []
 curr_np_array = np.empty(shape=(0,12))
@@ -59,14 +60,14 @@ for i in range(370):
     list_of_test_labels.append(curr_array)
     
 # Save as pickles
-with open('Data\\train_inputs.pkl', 'wb') as handle:
+with open('Data'+os.sep+'train_inputs.pkl', 'wb') as handle:
     pickle.dump(list_of_train, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-with open('Data\\train_outputs.pkl', 'wb') as handle:
+with open('Data'+os.sep+'train_outputs.pkl', 'wb') as handle:
     pickle.dump(list_of_train_labels, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-with open('Data\\test_inputs.pkl', 'wb') as handle:
+with open('Data'+os.sep+'test_inputs.pkl', 'wb') as handle:
     pickle.dump(list_of_test, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-with open('Data\\test_outputs.pkl', 'wb') as handle:
+with open('Data'+os.sep+'test_outputs.pkl', 'wb') as handle:
     pickle.dump(list_of_test_labels, handle, protocol=pickle.HIGHEST_PROTOCOL)
