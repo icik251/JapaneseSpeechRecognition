@@ -3,10 +3,9 @@ import numpy as np
 import os
 
 
+class FeatureSelection:
 
-class Feature_selection:
-
-    def __init__(self, filepath, U=4, V=5, K=3):
+    def __init__(self, filepath, U=4, V=20, K=3):
         self.df = pd.read_pickle(filepath)
         self.U = U
         self.V = V
@@ -14,8 +13,22 @@ class Feature_selection:
         self.K = K
         self.bins = self.init_bins()
 
-    def init_bins(self, U=4, V=5):
+    def init_bins(self, U=4, V=20):
+        '''
+        initializes the bins that through which the signals should cross. It will evenly divide the length of the
+        longest time-serie into U equally spaced threshold values. The range of possible values on y-axis is
+        divided into V equally spaced thresholds. Once these thresholds values are determined, it can be seen as a grid
+        which overlays the time-series. Finally, all possible rectangles within the gris are determined.
+        :param U: number of thresholds values on the x-axis
+        :type U: int
+        :param V: number of threshold values on the y-axis
+        :type V: int
+        :return: List of all initialized bins
+        :rtype: list
+        '''
         max_length, y_min, y_max = self.find_limits()
+
+        # x_theta is cast to an int-array for computational convenience
         x_theta = np.arange(0, max_length+1, (max_length/(self.U-1))).astype(int)
         print(f"x_theta values:{x_theta}")
         y_theta = np.arange(y_min, y_max+0.01, ((y_max-y_min)/(self.V-1)))
@@ -31,18 +44,32 @@ class Feature_selection:
         return bins
 
     def get_features(self):
-        feature_matrix = {}
+        '''
+        apply the feature extraction to each sample within the data-frame
+        :return: dataframe containing the extracted features from the original dataframe
+        :rtype: list[list]
+        '''
+        feature_matrix = np.empty((len(self.df), self.length_feature_vector()))
         for sample_idx in range(len(self.df)):
-            feature_matrix[sample_idx] = self.determine_feature_vector(self.df[sample_idx])
+            sample_features = self.determine_feature_vector(self.df[sample_idx])
+            print(f'sample_features shape: {sample_features.shape}')
+            feature_matrix[sample_idx] = sample_features
+        print(feature_matrix.shape)
         return feature_matrix
 
     def determine_feature_vector(self, signal):
+        '''
+        uses the number of passes though each bin to determine the extracted features from the signal
+        :param signal: multi-dimensional input signal
+        :type signal: list[list]
+        :return: feature-vector of the input signal
+        :rtype: list[]
+        '''
         feature_vector = np.empty(self.length_feature_vector())
         idx = 0
         for bin in self.bins:
             for k in range(1, self.K+1):
                 passes = bin.count_passes_for_each_dimension(signal, self.n)
-                print(passes)
                 for entry in passes:
                     feature_vector[idx] = 1 if entry >= k else 0
                     idx += 1
@@ -74,6 +101,14 @@ class Feature_selection:
         return int((((U-1)*U)/2)*(((V-1)*V)/2))
 
     def find_limits(self):
+        '''
+        Finds the limits within the data sample
+
+        :return:    1. the max length of the sample
+                    2. the minimum value encountered
+                    3. the maximum value encountered
+        :rtype: ??? (I have no idea how its called... some kind of tuple?)
+        '''
         y_min = float('inf')
         y_max = float('-inf')
 
@@ -97,13 +132,13 @@ class Bin:
         though the bin.
         :param idx: Identifier of the bin
         :type: int
-        :param x1: The x-coordinate of the left-most boundary
+        :param x1: The x-value of the left-most boundary
         :type x1: int
-        :param x2: The x-coordinate of the right-most boundary
+        :param x2: The x-value of the right-most boundary
         :type x2: int
-        :param y1: The y-coordinate of the bottom boundary
+        :param y1: The y-value of the bottom boundary
         :type y1: float
-        :param y2: The y-coordinate of the top boundary
+        :param y2: The y-value of the top boundary
         :type y2: float
         '''
         self.idx = idx
@@ -113,13 +148,34 @@ class Bin:
         self.y2 = y2
 
     def count_passes_for_each_dimension(self, signal, n=12):
+        '''
+        Selects the relevant part of the signal and initiates the recursive method used to
+        determine the number of passes trough the bins
+        :param signal: The signal that requires processing
+        :type signal: list
+        :param n: The number of dimensions
+        :type n: int
+        :return: matrix of the passes though all initialized bins separated by dimension
+        :rtype: list[list]
+        '''
         relevant_signal = signal[self.x1:self.x2+1]
         return self.count_passes_recursive(relevant_signal, n)
 
-    def count_passes_recursive(self, remaining_signal, n=12, inside=np.full((12), False)):
+    def count_passes_recursive(self, remaining_signal, n=12, inside=np.full(12, False)):
+        '''
+        Determines how often the signal enters the bin. This is done by checking each time-step whether the signal is
+        going from outside of the bin to inside of the bin for each dimension.
+        :param remaining_signal: The signal that still need processing
+        :type remaining_signal: list[list]
+        :param n: number of dimensions
+        :type n: int
+        :param inside: a boolean representing whether the signal was in- or outside the bin in the previous time-step
+        :type inside: bool
+        :return: Multi dimensional array showing how often the signal entered the bin over each dimension
+        :rtype: list[list]
+        '''
         if len(remaining_signal) == 0:  # the end of the relevant signal has been reached
             return np.zeros(n)
-
         passes = np.zeros(n)
         next_iteration_inside = np.full((n), False)
         for dim in range(n):
@@ -132,18 +188,6 @@ class Bin:
                     passes[dim] += 1
         passes_total = np.add(passes, self.count_passes_recursive(remaining_signal[1:], n, next_iteration_inside))
         return passes_total
-        #
-        # if inside:
-        #     if self.is_within_box(remaining_signal[0]):  # the signal remains inside the bin
-        #         return self.count_passes_recursive(remaining_signal[1:], n, True)
-        #     else:  # the signal has exited the bin
-        #         return self.count_passes_recursive(remaining_signal[1:], n, False)
-        # else:
-        #     if self.is_within_box(remaining_signal[0]):  # the signal has reentered the bin
-        #         return 1 + self.count_passes_recursive(remaining_signal[1:], n, True)
-        #     else:  # the signal remains outside of the bin
-        #         return self.count_passes_recursive(remaining_signal[1:], n, False)
-        # return
 
     def is_within_box(self, y):
         return self.y1 <= y <= self.y2
@@ -152,7 +196,7 @@ class Bin:
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
 
-features = Feature_selection("Data"+os.sep+"test_inputs.pkl")
-max_length, y_min, y_max = features.find_limits()
-print(f"max_length: {max_length}, y_min: {y_min}, y_max: {y_max}")
+features = FeatureSelection("Data" + os.sep + "test_inputs.pkl")
+max_l, y_m, y_m = features.find_limits()
+print(f"max_length: {max_l}, y_min: {y_m}, y_max: {y_m}")
 result = features.get_features()
