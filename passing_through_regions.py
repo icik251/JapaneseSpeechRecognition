@@ -30,9 +30,7 @@ class FeatureSelection:
 
         # x_theta is cast to an int-array for computational convenience
         x_theta = np.arange(0, max_length+1, (max_length/(self.U-1))).astype(int)
-        print(f"x_theta values:{x_theta}")
         y_theta = np.arange(y_min, y_max+0.01, ((y_max-y_min)/(self.V-1)))
-        print(f"y_theta values:{y_theta}")
         idx = 0
         bins = np.empty(self.number_of_rectangles(), dtype=object)
         for x1 in range(0, (self.U-1)):
@@ -52,9 +50,7 @@ class FeatureSelection:
         feature_matrix = np.empty((len(self.df), self.length_feature_vector()))
         for sample_idx in range(len(self.df)):
             sample_features = self.determine_feature_vector(self.df[sample_idx])
-            print(f'sample_features shape: {sample_features.shape}')
             feature_matrix[sample_idx] = sample_features
-        print(feature_matrix.shape)
         return feature_matrix
 
     def determine_feature_vector(self, signal):
@@ -196,7 +192,7 @@ class Bin:
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
 
-features = FeatureSelection("Data" + os.sep + "test_inputs.pkl")
-max_l, y_m, y_m = features.find_limits()
-print(f"max_length: {max_l}, y_min: {y_m}, y_max: {y_m}")
-result = features.get_features()
+# features = FeatureSelection("Data" + os.sep + "test_inputs.pkl")
+# max_l, y_m, y_m = features.find_limits()
+# print(f"max_length: {max_l}, y_min: {y_m}, y_max: {y_m}")
+# result = features.get_features()
