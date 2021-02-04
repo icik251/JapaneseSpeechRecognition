@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 import os
-
+import PCA_implementation
 
 class FeatureSelection:
 
-    def __init__(self, filepath, U=4, V=20, K=3):
-        self.df = pd.read_pickle(filepath)
+    def __init__(self, df, U=4, V=20, K=3):
+        self.df = df
         self.U = U
         self.V = V
         self.n = len(self.df[0][0])
@@ -192,7 +192,9 @@ class Bin:
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
 
-# features = FeatureSelection("Data" + os.sep + "test_inputs.pkl")
+filepath = "Data" + os.sep + "test_inputs.pkl"
+data = pd.read_pickle(filepath)
+features = FeatureSelection(data)
 # max_l, y_m, y_m = features.find_limits()
 # print(f"max_length: {max_l}, y_min: {y_m}, y_max: {y_m}")
 # result = features.get_features()
