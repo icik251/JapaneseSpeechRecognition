@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import os
-# import PCA_implementation
 from sklearn.decomposition import PCA
 
 class FeatureSelection:
@@ -28,8 +27,6 @@ class FeatureSelection:
         self.n_pc = n_pc
         self.pca = PCA(self.n_pc)
         self.pca.fit(self.ptr_features)
-
-
 
     def init_bins(self, U=4, V=20):
         '''
@@ -58,15 +55,6 @@ class FeatureSelection:
                         bins[idx] = Bin(idx, x_theta[x1], x_theta[x2], y_theta[y1], y_theta[y2])
                         idx += 1
         return bins
-    #
-    # def get_ptr_features(self):
-    #     '''
-    #     Simply retrieve the ptr_feature
-    #     :return: dataframe containing the extracted features from the original dataframe
-    #     :rtype: list[list]
-    #     '''
-    #     return self.ptr_features
-    #
 
     def get_training_features(self):
         '''
@@ -79,7 +67,6 @@ class FeatureSelection:
     def pca_transform_data(self, data):
         ptr_features = self.determine_ptr_features(data)
         return self.pca.transform(ptr_features)
-
 
     def determine_ptr_features(self, data=None):
         '''
@@ -165,6 +152,7 @@ class FeatureSelection:
                         y_min = value
         return max_length, y_min, y_max
 
+
 class Bin:
     def __init__(self, idx, x1, x2, y1, y2):
         '''
@@ -235,7 +223,7 @@ class Bin:
     def __str__(self):
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
-#
+# --------- Debugging statements -------
 # filepath_training = "Data" + os.sep + "train_inputs.pkl"
 # train_data = pd.read_pickle(filepath_training)
 #
