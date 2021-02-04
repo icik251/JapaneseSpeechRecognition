@@ -22,6 +22,8 @@ class ProcessingMissingData:
                             predicted_value_for_curr_timestep = np.mean(self.dict_of_cc_dicts_modified[feature_idx][i])
                         elif type == 'median':
                             predicted_value_for_curr_timestep = np.median(self.dict_of_cc_dicts_modified[feature_idx][i])
+                        elif type == 'zero_padding':
+                            predicted_value_for_curr_timestep = 0
                             
                         list_of_additions.append(predicted_value_for_curr_timestep)
                     updated_feature_vector = np.append(feature_vector, np.array(list_of_additions))
