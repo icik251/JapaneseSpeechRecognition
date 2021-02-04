@@ -1,17 +1,35 @@
 import pandas as pd
 import numpy as np
 import os
-import PCA_implementation
+# import PCA_implementation
+from sklearn.decomposition import PCA
 
 class FeatureSelection:
 
-    def __init__(self, df, U=4, V=20, K=3):
+    def __init__(self, df, n_pc, U=4, V=20, K=3):
+        '''
+        Constructor of the FeatureSelection object
+        :param df: Original dataframe
+        :param U: Number of subdivisions on the x-axis
+        :param V: Number of subdivisions on the y-axis
+        :param K: Maximum count of passes though a bin
+        :param n_pc: Number of principal components extracted with pca
+        '''
         self.df = df
         self.U = U
         self.V = V
         self.n = len(self.df[0][0])
         self.K = K
+        print("---------------Initializing bins-----------------")
         self.bins = self.init_bins()
+        print("---------------Determining PTR features-----------------")
+        self.ptr_features = self.determine_ptr_features()
+        print("---------------Initializing PCA-----------------")
+        self.n_pc = n_pc
+        self.pca = PCA(self.n_pc)
+        self.pca.fit(self.ptr_features)
+
+
 
     def init_bins(self, U=4, V=20):
         '''
@@ -40,20 +58,46 @@ class FeatureSelection:
                         bins[idx] = Bin(idx, x_theta[x1], x_theta[x2], y_theta[y1], y_theta[y2])
                         idx += 1
         return bins
+    #
+    # def get_ptr_features(self):
+    #     '''
+    #     Simply retrieve the ptr_feature
+    #     :return: dataframe containing the extracted features from the original dataframe
+    #     :rtype: list[list]
+    #     '''
+    #     return self.ptr_features
+    #
 
-    def get_features(self):
+    def get_training_features(self):
+        '''
+        This method return the training vectors returned
+        :return:
+        '''
+        print("---------------Transforming PTR features using PCA-----------------")
+        return self.pca.transform(self.ptr_features)
+
+    def pca_transform_data(self, data):
+        ptr_features = self.determine_ptr_features(data)
+        return self.pca.transform(ptr_features)
+
+
+    def determine_ptr_features(self, data=None):
         '''
         apply the feature extraction to each sample within the data-frame
         :return: dataframe containing the extracted features from the original dataframe
         :rtype: list[list]
         '''
-        feature_matrix = np.empty((len(self.df), self.length_feature_vector()))
-        for sample_idx in range(len(self.df)):
-            sample_features = self.determine_feature_vector(self.df[sample_idx])
+
+        df = self.df if data is None else data
+
+        feature_matrix = np.empty((len(df), self.length_feature_vector()))
+        for sample_idx in range(len(df)):
+            sample_features = self.determine_ptr_feature_vector(df[sample_idx])
             feature_matrix[sample_idx] = sample_features
         return feature_matrix
 
-    def determine_feature_vector(self, signal):
+
+    def determine_ptr_feature_vector(self, signal):
         '''
         uses the number of passes though each bin to determine the extracted features from the signal
         :param signal: multi-dimensional input signal
@@ -191,10 +235,14 @@ class Bin:
     def __str__(self):
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
+#
+# filepath_training = "Data" + os.sep + "train_inputs.pkl"
+# train_data = pd.read_pickle(filepath_training)
+#
+# filepath_testing = "Data" + os.sep + "test_inputs.pkl"
+# test_data = pd.read_pickle(filepath_testing)
+# features = FeatureSelection(train_data, n_pc=0.96)
+#
+# print(f"Final training data: {np.shape(features.get_training_features())}")
+# print(f"Final tresting data: {np.shape(features.pca_transform_data(test_data))}")
 
-filepath = "Data" + os.sep + "test_inputs.pkl"
-data = pd.read_pickle(filepath)
-features = FeatureSelection(data)
-# max_l, y_m, y_m = features.find_limits()
-# print(f"max_length: {max_l}, y_min: {y_m}, y_max: {y_m}")
-# result = features.get_features()
