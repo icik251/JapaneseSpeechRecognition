@@ -25,6 +25,8 @@ class FeatureSelection:
         self.ptr_features = self.determine_ptr_features()
         print("---------------Initializing PCA-----------------")
         self.n_pc = n_pc
+        print(np.isinf(self.ptr_features).any())
+        print(np.isnan(self.ptr_features).any())
         self.pca = PCA(self.n_pc)
         self.pca.fit(self.ptr_features)
 
