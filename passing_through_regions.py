@@ -101,6 +101,7 @@ class FeatureSelection:
                     feature_vector[idx] = 1 if entry >= k else 0
                     idx += 1
                     feature_vector[idx] = 1 if entry < k else 0
+                    idx += 1
         return feature_vector
 
 
@@ -150,6 +151,7 @@ class FeatureSelection:
                         y_max = value
                     if value < y_min:
                         y_min = value
+        print(f'found limits: max_length: {max_length}, y_min: {y_min}, y_max: {y_max}')
         return max_length, y_min, y_max
 
 
