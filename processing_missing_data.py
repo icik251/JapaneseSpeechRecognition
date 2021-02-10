@@ -1,10 +1,11 @@
 import pickle
 import numpy as np
+import os
 
 class ProcessingMissingData:
     def __init__(self):
         ## Load the dictionary that we need for predicting values
-        with open('Data\\dict_of_cc_dicts_list_of_timestep_values.pkl', 'rb') as handle:
+        with open('Data'+os.sep+'dict_of_cc_dicts_list_of_timestep_values.pkl', 'rb') as handle:
             self.dict_of_cc_dicts_modified = pickle.load(handle)
             
         
