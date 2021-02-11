@@ -101,6 +101,7 @@ class FeatureSelection:
                     feature_vector[idx] = 1 if entry >= k else 0
                     idx += 1
                     feature_vector[idx] = 1 if entry < k else 0
+                    idx += 1
         return feature_vector
 
 
@@ -150,6 +151,7 @@ class FeatureSelection:
                         y_max = value
                     if value < y_min:
                         y_min = value
+        print(f'found limits: max_length: {max_length}, y_min: {y_min}, y_max: {y_max}')
         return max_length, y_min, y_max
 
 
@@ -224,12 +226,12 @@ class Bin:
         return f"idx: {self.idx} - x:({self.x1},{self.x2}) - y:{self.y1},{self.y2})"
 
 # --------- Debugging statements -------
-#filepath_training = "Data" + os.sep + "train_inputs.pkl"
-#train_data = pd.read_pickle(filepath_training)
+# filepath_training = "Data" + os.sep + "train_inputs.pkl"
+# train_data = pd.read_pickle(filepath_training)
 #
-#filepath_testing = "Data" + os.sep + "test_inputs.pkl"
-#test_data = pd.read_pickle(filepath_testing)
-#features = FeatureSelection(train_data[0:244], n_pc=60)
+# filepath_testing = "Data" + os.sep + "test_inputs.pkl"
+# test_data = pd.read_pickle(filepath_testing)
+# features = FeatureSelection(train_data, n_pc=0.96)
 #
-#print(f"Final training data: {np.shape(features.get_training_features())}")
-#print(f"Final tresting data: {np.shape(features.pca_transform_data(train_data[244:]))}")
+# print(f"Final training data: {np.shape(features.get_training_features())}")
+# print(f"Final tresting data: {np.shape(features.pca_transform_data(test_data))}")
